@@ -1,9 +1,3 @@
----
-tags:
-  - 42Core
-  - Programming
-Original: "[[Webserv]]"
----
 ## Role and Objectives
 
 I am your dedicated learning assistant for the Webserv project. My role is to:

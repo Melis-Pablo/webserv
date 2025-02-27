@@ -2,7 +2,7 @@
 
 ### This is when you finally understand why a URL starts with HTTP
 
-> [!summary] 
+> [!note]
 > This project is about writing your own HTTP server.
 > You will be able to test it with an actual browser.
 > HTTP is one of the most used protocols on the internet.
@@ -70,15 +70,16 @@ Your executable will be run as follows:
 ./webserv [configuration file]
 ```
 
->[!info]
+>[!note]
 >Even if poll() is mentioned in the subject and the evaluation scale, you can use any equivalent such as select(), kqueue(), or epoll().
 
->[!warning] 
+>[!warning]
 >Please read the RFC and do some tests with telnet and NGINX before starting this project.
 >Even if you don't have to implement all the RFC, reading it will help you develop the required features.
 
 ### 3.1 Requirements
 ---
+
 - Your program has to take a configuration file as argument, or use a default path.
 - You can’t execve another web server.
 - Your server must never block and the client can be bounced properly if necessary.
@@ -88,7 +89,7 @@ Your executable will be run as follows:
 - Checking the value of errno is strictly forbidden after a read or a write operation.
 - You don’t need to use poll() (or equivalent) before reading your configuration file.
 
->[!warning] 
+>[!warning]
 >Because you have to use non-blocking file descriptors, it is possible to use read/recv or write/send functions with no poll() (or equivalent), and your server wouldn’t be blocking.
 But it would consume more system resources.
 Thus, if you try to read/recv or write/send in any file descriptor without using poll() (or equivalent), your grade will be 0.
@@ -109,7 +110,7 @@ Thus, if you try to read/recv or write/send in any file descriptor without using
 ### 3.2 For MacOS only
 ---
 
-> [!info]
+> [!note]
 > Since MacOS doesn't implement write() the same way as other Unix OSes, you are allowed to use fcntl().
 > You must use file descriptors in non-blocking mode in order to get behavior similar to the one of the other Unix OSes.
 
@@ -120,7 +121,8 @@ Thus, if you try to read/recv or write/send in any file descriptor without using
 
 ### 3.3 Configuration file
 ---
->[!tip] 
+
+>[!tip]
 >You can get some inspiration from the 'server' part of NGINX configuration file.
 
 In the configuration file, you should be able to:
@@ -148,15 +150,15 @@ In the configuration file, you should be able to:
 
 You must provide some configuration files and default basic files to test and demonstrate every feature works during evaluation.
 
->[!info] 
+>[!note]
 >If you’ve got a question about one behavior, you should compare your program behavior with NGINX’s.
 For example, check how does server_name work.
 We’ve shared with you a small tester. It’s not mandatory to pass it if everything works fine with your browser and tests, but it can help you hunt some bugs.
 
->[!warning] 
+>[!warning]
 >The important thing is resilience. Your server should never die.
 
->[!warning] 
+>[!warning]
 >Do not test with only one program. Write your tests with a more convenient language such as Python or Golang, and so forth. Even in C or C++ if you want to.
 
 ## 4. Bonus part
@@ -165,9 +167,10 @@ Here are the extra features you can add:
 - Support cookies and session management (prepare quick examples).
 - Handle multiple CGI.
 
->[!warning] 
+>[!warning]
 >The bonus part will only be assessed if the mandatory part is PERFECT. Perfect means the mandatory part has been integrally done and works without malfunctioning. If you have not passed ALL the mandatory requirements, your bonus part will not be evaluated at all.
 
 ## 5. Submission and peer-evaluation
 ---
+
 Turn in your assignment in your Git repository as usual. Only the work inside your repository will be evaluated during the defense. Don't hesitate to double check the names of your files to ensure they are correct.
