@@ -1,176 +1,183 @@
 # Webserv
 
-### This is when you finally understand why a URL starts with HTTP
+## 🌐 Project Overview
 
-> [!note]
-> This project is about writing your own HTTP server.
-> You will be able to test it with an actual browser.
-> HTTP is one of the most used protocols on the internet.
-> Knowing its arcane will be useful, even if you won't be working on a website.
-> Version: 21.2
+Webserv is a custom HTTP/1.1 server implemented in C++98, capable of serving static websites, handling file uploads, and executing CGI scripts. This project delves into the core mechanics of web servers, providing a deep understanding of the HTTP protocol and network programming.
 
-## 0. Contents
----
+Unlike higher-level frameworks that abstract away the complexities of HTTP communication, Webserv is built from the ground up, managing everything from socket connections to request parsing and response generation manually.
 
-1. Introduction
-2. General Rules
-3. Mandatory part
-	3.1 Requirements
-	3.2 For MacOS only
-	3.3 Configuration file
-4. Bonus Part
-5. Submission and peer-evaluation
+The server features non-blocking I/O operations, efficient connection handling through poll/select/kqueue/epoll, and support for multiple virtual servers through a Nginx-inspired configuration system.
 
-## 1. Introduction
----
+## ✨ Features
 
-The **Hypertext Transfer Protocol** (HTTP) is an application protocol for distributed, collaborative, hypermedia information systems.
+### Core HTTP Server
+- **HTTP/1.1 Protocol**: Full implementation of essential HTTP features
+- **Multiple Virtual Servers**: Host multiple websites on different ports
+- **Non-blocking I/O**: Efficient handling of concurrent connections
+- **Connection Management**: Proper timeout handling and connection limits
+- **Error Handling**: Custom error pages and proper error status codes
 
-HTTP is the foundation of data communication for the World Wide Web, where hypertext documents include hyperlinks to other resources that the user can easily access. For example, by a mouse click or by tapping the screen in a web browser.
+### Request Processing
+- **Method Support**: Complete implementation of GET, POST, and DELETE methods
+- **Header Parsing**: Accurate parsing and validation of HTTP headers
+- **Request Validation**: Proper handling of malformed requests
+- **Content Negotiation**: Support for different content types
 
-HTTP was developed to facilitate hypertext and the World Wide Web.
+### Response Generation
+- **Status Codes**: Accurate HTTP response status codes
+- **MIME Types**: Proper content type detection based on file extensions
+- **Response Headers**: Generation of appropriate response headers
+- **Chunked Transfer**: Support for chunked transfer encoding
 
-The primary function of a web server is to store, process, and deliver web pages to clients. The communication between client and server takes place using Hypertext Transfer Protocol (HTTP).
+### File Operations
+- **Static File Serving**: Efficiently serve HTML, CSS, JS, and media files
+- **Directory Listing**: Optional directory browsing for specified routes
+- **File Uploads**: Handle multipart/form-data for file uploads
+- **Access Control**: Path validation and security measures
 
-Pages delivered are most frequently HTML documents, which may include images, style sheets, and scripts in addition to the text content.
+### CGI Support
+- **CGI Execution**: Run server-side scripts (PHP, Python, etc.)
+- **Environment Variables**: Proper setup of CGI environment
+- **Input/Output Handling**: Manage data flow between client and CGI script
+- **Process Management**: Proper creation and cleanup of CGI processes
 
-Multiple web servers may be used for a high traffic website.
+## 🔧 Technical Implementation
 
-A user agent, commonly a web browser or a web crawler, initiates communication by requesting a specific resource using HTTP and the server responds with the content of that resource or an error message if unable to do so. The resource is typically a real file on the server's secondary storage, but this is not necessarily the case and depends on how the web server is implemented.
+### Server Architecture
+The server follows a modular, event-driven architecture:
 
-While the primary function is to serve content, full implementation of HTTP also includes ways of receiving content from clients. This feature is used for submitting web forms, including the uploading of files.
+1. **Socket Management**: Creating, binding, and listening on specified ports
+2. **Event Loop**: Using poll/select/kqueue/epoll for non-blocking I/O operations
+3. **Request Parsing**: Breaking down raw HTTP requests into manageable components
+4. **Routing**: Matching requests to the appropriate handlers based on configuration
+5. **Response Generation**: Creating and sending HTTP responses
+6. **Resource Cleanup**: Properly closing connections and freeing resources
 
-## 2. General Rules
----
+### Configuration System
+The configuration system is inspired by Nginx and supports:
 
-- Your program should not crash in any circumstances (even when it runs out of memory), and should not quit unexpectedly. If it happens, your project will be considered non-functional and grade will be 0.
-- You have to turn in a Makefile which will compile your source files. It must not relink.
-- Your Makefile must at least contain the rules: $(NAME), all, clean, fclean, and re.
-- Compile your code with c++ and the flags -Wall -Wextra -Werror
-- Your code must comply with the C++98 Standard. Then, it should still compile if you add the flag -std=c++98.
-- Try to always develop using the most C++ features you can (for example, choose \<cstring> over <string.h>). You are allowed to use C functions, but always prefer their C++ versions if possible.
-- Any external library and Boost libraries are forbidden.
+- Multiple server blocks with different hosts and ports
+- Location blocks for route-specific settings
+- Custom error pages
+- Client body size limits
+- Directory listing toggles
+- Index file specifications
+- CGI execution rules
 
-## 3. Mandatory Part
----
+### Non-blocking I/O
+All I/O operations are non-blocking, allowing the server to handle multiple connections simultaneously without spawning multiple threads or processes:
 
-| Program Name       | webserv                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Turn in files      | Makefile, \*.{h, hpp}, \*.cpp, \*.tpp, \*.ipp, configuration files                                                                                                                                                                                                                                                                                                                                                                                              |
-| Makefile           | NAME, all, clean, fclean, re                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Arguments          | [A configuration file]                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| External functions | Everything in C++ 98.<br>execve, dup, dup2, pipe, strerror, gai_strerror, errno, dup, dup2, fork, socketpair, htons, htonl, ntohs, ntohl, select, poll, epoll (epoll_create, epoll_ctl, epoll_wait), kqueue (kqueue, kevent), socket, accept, listen, send, recv, chdir bind, connect, getaddrinfo, freeaddrinfo, setsockopt, getsockname, getprotobyname, fcntl, close, read, write, waitpid, kill, signal, access, stat, open, opendir, readdir and closedir. |
-| Libft authorized   | n/a                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Description        | A HTTP server in C++ 98                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+- Socket operations (accept, send, recv) are all non-blocking
+- A single poll/select/kqueue/epoll call manages all file descriptors
+- Proper buffering mechanisms for partial reads and writes
+- Timeout handling for stalled connections
 
-You must write a HTTP server in C++ 98.
+### CGI Implementation
+The CGI implementation follows the Common Gateway Interface specification:
 
-Your executable will be run as follows:
-```sh
-./webserv [configuration file]
+- Proper environment variable setup (PATH_INFO, QUERY_STRING, etc.)
+- Request body forwarding to CGI scripts
+- Response parsing and forwarding to clients
+- Process management with appropriate timeout handling
+
+## 💻 Usage
+
+### Prerequisites
+- C++ compiler with C++98 support
+- Unix-based operating system (Linux or macOS)
+- Make
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/Melis-Pablo/webserv.git
+cd webserv
+
+# Compile the server
+make
 ```
 
->[!note]
->Even if poll() is mentioned in the subject and the evaluation scale, you can use any equivalent such as select(), kqueue(), or epoll().
+### Running the Server
+```bash
+# Start with default configuration
+./webserv
 
->[!warning]
->Please read the RFC and do some tests with telnet and NGINX before starting this project.
->Even if you don't have to implement all the RFC, reading it will help you develop the required features.
+# Start with a specific configuration file
+./webserv config/default.conf
+```
 
-### 3.1 Requirements
+### Configuration Example
+```
+# Server block example
+server {
+    listen 8080;
+    server_name example.com;
+    client_max_body_size 10M;
+    error_page 404 /404.html;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+        allowed_methods GET POST;
+        autoindex on;
+    }
+
+    location /uploads {
+        root /var/www/uploads;
+        allowed_methods POST;
+        upload_store /tmp/uploads;
+    }
+
+    location ~ \.php$ {
+        root /var/www/php;
+        index index.php;
+        allowed_methods GET POST;
+        cgi_pass /usr/bin/php-cgi;
+    }
+}
+```
+
+## 📝 Learning Outcomes
+
+This project provided in-depth experience with:
+
+- **Network Programming**: Socket management, connection handling, and HTTP protocol implementation
+- **Event-driven Architecture**: Non-blocking I/O and event loop design
+- **HTTP Protocol**: Detailed understanding of HTTP/1.1 specifications
+- **Parser Design**: Creating a robust HTTP request parser
+- **Process Management**: Handling CGI script execution
+- **Configuration Systems**: Designing and implementing a flexible configuration format
+- **Error Handling**: Graceful handling of edge cases and error conditions
+- **Resource Management**: Efficient allocation and deallocation of resources
+
+## 🛠️ Testing
+
+The server was tested extensively using:
+
+- Manual testing with browsers (Chrome, Firefox, Safari)
+- Curl and wget command-line tools
+- Custom test scripts for edge cases
+- Siege and ApacheBench for load testing
+- Valgrind for memory leak detection
+
+## 🔍 Challenges and Solutions
+
+### Challenge: Concurrent Connection Handling
+**Solution**: Implemented non-blocking I/O with poll/select/kqueue/epoll to manage multiple connections with a single thread.
+
+### Challenge: CGI Script Execution
+**Solution**: Used fork, pipe, and dup2 to create proper communication channels between the server and CGI scripts.
+
+### Challenge: Parsing Multipart Form Data
+**Solution**: Developed a state machine parser that efficiently processes multipart boundaries and extracts file content.
+
+### Challenge: Managing Partial Reads/Writes
+**Solution**: Implemented buffer management to handle incomplete reads and writes, ensuring data integrity.
+
+## ⚠️ Note
+
+For detailed project requirements, see the [webserv.md](webserv.md) file.
+
 ---
 
-- Your program has to take a configuration file as argument, or use a default path.
-- You can’t execve another web server.
-- Your server must never block and the client can be bounced properly if necessary.
-- It must be non-blocking and use only 1 poll() (or equivalent) for all the I/O operations between the client and the server (listen included).
-- poll() (or equivalent) must check read and write at the same time.
-- You must never do a read or a write operation without going through poll() (or equivalent).
-- Checking the value of errno is strictly forbidden after a read or a write operation.
-- You don’t need to use poll() (or equivalent) before reading your configuration file.
-
->[!warning]
->Because you have to use non-blocking file descriptors, it is possible to use read/recv or write/send functions with no poll() (or equivalent), and your server wouldn’t be blocking.
-But it would consume more system resources.
-Thus, if you try to read/recv or write/send in any file descriptor without using poll() (or equivalent), your grade will be 0.
-
-- You can use every macro and define like FD_SET, FD_CLR, FD_ISSET, FD_ZERO (understanding what and how they do it is very useful).
-- A request to your server should never hang forever.
-- Your server must be compatible with the web browser of your choice.
-- We will consider that NGINX is HTTP 1.1 compliant and may be used to compare headers and answer behaviors.
-- Your HTTP response status codes must be accurate.
-- You server must have default error pages if none are provided.
-- You can’t use fork for something else than CGI (like PHP, or Python, and so forth).
-- You must be able to serve a fully static website.
-- Clients must be able to upload files.
-- You need at least GET, POST, and DELETE methods.
-- Stress tests your server. It must stay available at all cost.
-- Your server must be able to listen to multiple ports (see Configuration file).
-
-### 3.2 For MacOS only
----
-
-> [!note]
-> Since MacOS doesn't implement write() the same way as other Unix OSes, you are allowed to use fcntl().
-> You must use file descriptors in non-blocking mode in order to get behavior similar to the one of the other Unix OSes.
-
->[!warning]
->However, you are only allowed to use fcntl() with the following flags:
->F_SETFL, O_NONBLOCK and FD_CLOEXEC.
->Any other flag is forbidden.
-
-### 3.3 Configuration file
----
-
->[!tip]
->You can get some inspiration from the 'server' part of NGINX configuration file.
-
-In the configuration file, you should be able to:
-- Choose the port and host of each 'server'.
-- Setup the server_names or not.
-- The first server for a host:port will be the default for this host:port (that means it will answer to all the requests that don't belong to an other server).
-- Set default error pages.
-- Limit client body size.
-- Setup routes with one or multiple of the following rules/configuration (routes won't be using regexp):
-	- Define a list of accepted HTTP methods for the route.
-	- Define a HTTP redirection
-	- Define a directory or a file from where the file should be searched (for example, if url /kapouet is rooted to /tmp/www, url /kapouet/pouic/toto/pouet is /tmp/www/pouic/toto/pouet).
-	- Turn on or off directory listing.
-	- Set a default file to answer if the request is a directory.
-	- Execute CGI based on certain file extension (for example .php).
-	- Make it work with POST and GET methods.
-	- Make the route able to accept uploaded files and configure where they should be saved.
-		- Do you wonder what a [CGI](https://en.wikipedia.org/wiki/Common_Gateway_Interface) is?
-		- Because you won’t call the CGI directly, use the full path as PATH_INFO.
-		- Just remember that, for chunked request, your server needs to unchunk it, the CGI will expect EOF as end of the body.
-		- Same things for the output of the CGI. If no content_length is returned from the CGI, EOF will mark the end of the returned data.
-		- Your program should call the CGI with the file requested as first argument.
-		- The CGI should be run in the correct directory for relative path file access.
-		- Your server should work with one CGI (php-CGI, Python, and so forth).
-
-You must provide some configuration files and default basic files to test and demonstrate every feature works during evaluation.
-
->[!note]
->If you’ve got a question about one behavior, you should compare your program behavior with NGINX’s.
-For example, check how does server_name work.
-We’ve shared with you a small tester. It’s not mandatory to pass it if everything works fine with your browser and tests, but it can help you hunt some bugs.
-
->[!warning]
->The important thing is resilience. Your server should never die.
-
->[!warning]
->Do not test with only one program. Write your tests with a more convenient language such as Python or Golang, and so forth. Even in C or C++ if you want to.
-
-## 4. Bonus part
----
-Here are the extra features you can add:
-- Support cookies and session management (prepare quick examples).
-- Handle multiple CGI.
-
->[!warning]
->The bonus part will only be assessed if the mandatory part is PERFECT. Perfect means the mandatory part has been integrally done and works without malfunctioning. If you have not passed ALL the mandatory requirements, your bonus part will not be evaluated at all.
-
-## 5. Submission and peer-evaluation
----
-
-Turn in your assignment in your Git repository as usual. Only the work inside your repository will be evaluated during the defense. Don't hesitate to double check the names of your files to ensure they are correct.
+*This project is part of the 42 School Common Core curriculum.*
